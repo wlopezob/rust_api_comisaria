@@ -9,6 +9,7 @@ pub struct ApiException {
 
 #[derive(Serialize)]
 pub struct ApiExceptionResponseMessage {
+    code: String,
     message: String,
     component: String,
 }
@@ -28,6 +29,7 @@ impl IntoResponse for ApiException {
         (
             self.code,
             Json(ApiExceptionResponseMessage{
+                code: self.code.to_string(),
                 message: self.message,
                 component: self.component
             })

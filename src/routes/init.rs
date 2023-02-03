@@ -5,6 +5,7 @@ use crate::controller::{home_controller::home_controller, ubigeo_controller::ubi
 
 pub async fn run() {
     let port = dotenv!("SERVER_PORT");
+    dbg!(&port);
     let app = init_router();
 
     axum::Server::bind(&format!("0.0.0.0:{port}").parse().unwrap())

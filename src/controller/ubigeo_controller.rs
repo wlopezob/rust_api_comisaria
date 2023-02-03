@@ -5,6 +5,7 @@ use reqwest::header::{HOST, ORIGIN};
 use serde_json::Value;
 
 use crate::models::api_exception::ApiException;
+use crate::utils::api_exception_enum::ApiExceptionEnum;
 use crate::{models::departamento_request::DepartamentoRequest, utils::util::remove_duplicates};
 
 pub fn ubigeo_controller() -> Router {
@@ -27,8 +28,7 @@ async fn get_all_dpto() -> Result<Json<DepartamentoRequest>,ApiException> {
             HeaderValue::from_static(origin),
         )
         .send()
-        .await
-        .unwrap();
+        .await.map_err(|_err| {ApiExceptionEnum::error_01()})?;
 
     let response_text = response.text().await.unwrap();
     let value_json: Value = serde_json::from_str(&response_text).unwrap();
