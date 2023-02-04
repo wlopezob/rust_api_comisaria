@@ -1,0 +1,19 @@
+{
+    "name": "Rust",
+      // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+      "image": "mcr.microsoft.com/devcontainers/rust:0-1-bullseye",
+      "extensions": [
+		    "rust-lang.rust-analyzer",
+		    "PKief.material-icon-theme",
+		    "bungcip.better-toml",
+		    "usernamehw.errorlens",
+		    "rangav.vscode-thunder-client",
+		    "peakchen90.open-html-in-browser"
+	   ],
+      "settings": {
+          "workbench.colorTheme": "Default Dark+",
+          "workbench.iconTheme": "material-icon-theme",
+          "files.autoSave": "off"
+      },
+      "forwardPorts": [3000]
+  }
