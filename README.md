@@ -1,4 +1,5 @@
 # API COMISARIA
+Get data of https://www.mininter.gob.pe/ubica-tu-comisaria
 
 ## ENPOINTS:
 ### get all departamento
