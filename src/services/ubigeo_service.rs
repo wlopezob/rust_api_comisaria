@@ -1,12 +1,15 @@
 use crate::api_caller::ubigeo_api_caller::ApiCaller;
+use crate::db::mongo_db::MongoDb;
 use crate::models::api_exception::ApiException;
 use crate::models::departamento_response::DepartamentoResponse;
 
-pub struct UbigeoService {}
+pub struct UbigeoService {
+    db: MongoDb
+}
 
 impl UbigeoService {
-    pub fn new() -> Self {
-        UbigeoService {}
+    pub fn new(db: MongoDb) -> Self {
+        UbigeoService {db}
     }
     pub async fn get_all_dpto(
         &self,
