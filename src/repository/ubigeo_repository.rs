@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use tokio_stream::{StreamExt};
 
 use mongodb::Database;
 
@@ -12,11 +13,6 @@ impl UbigeoRepository {
     pub fn new(db: Arc<Database>) -> Self {
         UbigeoRepository { db }
     }
-
-    pub fn hola(&self) -> String {
-        "hola".to_owned()
-    }
-
     pub async fn insert_departamento(
         &self,
         departamentos: Vec<DepartamentoResponse>,
@@ -26,11 +22,19 @@ impl UbigeoRepository {
         collection
             .insert_many(departamentos.clone(), None)
             .await
-            .map_err(|error|
-                {
-                    return Error::MongoError(error);
-                }
-            )?;
+            .map_err(|error| Error::MongoError(error))?;
+        Ok(departamentos)
+    }
+    pub async fn get_all_dpto(&self) -> Result<Vec<DepartamentoResponse>, Error> {
+        let collection = self.db.collection::<DepartamentoResponse>("departamento");
+        let mut result = collection
+            .find(None, None)
+            .await
+            .map_err(|error| Error::MongoError(error))?;
+        let mut departamentos = Vec::new();
+        while let Some(dep) = result.try_next().await? {
+            departamentos.push(dep);
+        }
         Ok(departamentos)
     }
 }

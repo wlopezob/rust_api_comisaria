@@ -22,4 +22,11 @@ impl ApiExceptionEnum {
             COMPONENT,
         )
     }
+    pub fn error_03() -> ApiException {
+        ApiException::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Error call api search provincia",
+            COMPONENT,
+        )
+    }
 }

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{extract::State, routing::get, Router};
+use axum::{Router};
 use dotenvy_macro::dotenv;
 
 use crate::{

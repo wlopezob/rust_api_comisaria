@@ -1,15 +1,25 @@
 use crate::models::api_exception::ApiException;
 use crate::models::departamento_response::DepartamentoResponse;
 use crate::routes::init::AppState;
-use crate::services::ubigeo_service;
+use crate::services::ubigeo_service::{self, UbigeoService};
 use axum::extract::State;
 use axum::{routing::get, Json, Router};
 use dotenvy_macro::dotenv;
 
 pub fn ubigeo_controller() -> Router<AppState> {
-    Router::new().route("/getalldpto", get(get_all_dpto))
+    Router::new()
+        .route("/getalldpto", get(get_all_dpto))
+        .route("/getalldptobd", get(get_all_dpto_bd))
 }
 
+async fn get_all_dpto_bd(
+    State(app_state): State<AppState>,
+) -> Result<Json<Vec<DepartamentoResponse>>, ApiException> {
+    let departamentos = UbigeoService::new(app_state.ubigeo_repository.clone())
+        .get_all_dpto_bd()
+        .await?;
+    Ok(Json(departamentos))
+}
 async fn get_all_dpto(
     State(app_state): State<AppState>,
 ) -> Result<Json<Vec<DepartamentoResponse>>, ApiException> {
