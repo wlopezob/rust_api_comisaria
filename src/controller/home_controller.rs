@@ -3,7 +3,9 @@ use axum::{
     Router,
 };
 
-pub fn home_controller() -> Router {
+use crate::routes::init::AppState;
+
+pub fn home_controller() -> Router<AppState> {
     Router::new().route("/", get(home))
 }
 

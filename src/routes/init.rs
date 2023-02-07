@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{routing::get,Router, extract::State};
+use axum::{extract::State, routing::get, Router};
 use dotenvy_macro::dotenv;
 
 use crate::{
@@ -8,32 +8,35 @@ use crate::{
         comisaria_controller::comisaria_controller, home_controller::home_controller,
         ubigeo_controller::ubigeo_controller,
     },
-    db::mongo_db::{self, MongoDb},
+    db::mongo_db::{self},
+    repository::ubigeo_repository::UbigeoRepository,
 };
 
 #[derive(Clone)]
 pub struct AppState {
-    pub mongo_db: Arc<MongoDb>
+    pub ubigeo_repository: UbigeoRepositoryState,
 }
 
 impl AppState {
-    pub fn new (db: MongoDb) -> Self {
-        AppState { mongo_db: Arc::new(db) }
-    }
-    
-    pub fn get_db(&self) -> Arc<MongoDb> {
-        self.mongo_db
+    pub fn new(ubigeo_repository: UbigeoRepositoryState) -> Self {
+        AppState { ubigeo_repository }
     }
 }
+
+pub type UbigeoRepositoryState = Arc<UbigeoRepository>;
 
 pub async fn run() {
     let port = dotenv!("SERVER_PORT");
     let database_connection = dotenv!("DATABASE_CONNECTION");
     let name_database = dotenv!("NAME_DATABASE");
-    let db =  mongo_db::MongoDb::init(database_connection, name_database)
-        .await.expect("Error load database");
-    dbg!(&port);
-    let app = init_router(db);
+    dbg!(&database_connection);
+    let db = mongo_db::MongoDb::init(database_connection, name_database)
+        .await
+        .expect("Error load database");
+    let ubigeo_repository: UbigeoRepositoryState =
+        Arc::new(UbigeoRepository::new(db.get_database()));
+    let app_state = AppState::new(ubigeo_repository);
+    let app = init_router(app_state);
 
     axum::Server::bind(&format!("0.0.0.0:{port}").parse().unwrap())
         .serve(app.into_make_service())
@@ -41,20 +44,15 @@ pub async fn run() {
         .unwrap();
 }
 
-fn init_router(db: MongoDb) -> Router {
-    let app_state = Arc::new(AppState::new(db));
-    Router::new().nest("/api/v1", chidren_router(app_state))
+fn init_router(app_state: AppState) -> Router {
+    Router::new()
+        .nest("/api/v1", chidren_router())
+        .with_state(app_state)
 }
 
-fn chidren_router(app_state: Arc<AppState>) -> Router {
+fn chidren_router() -> Router<AppState> {
     Router::new()
         .nest("/home", home_controller())
-        .nest("/ubigeo", ubigeo_controller(app_state))
+        .nest("/ubigeo", ubigeo_controller())
         .nest("/comisaria", comisaria_controller())
-}
-
-
-async fn demo(app_state: State<AppState>)  -> String {
-    dbg!(&app_state.mongo_db);
-    "demo".to_owned()
 }

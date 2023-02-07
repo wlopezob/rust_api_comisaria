@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::models::api_exception::ApiException;
 use axum::http::StatusCode;
 
@@ -10,6 +12,13 @@ impl ApiExceptionEnum {
         ApiException::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "Error call api search departamento",
+            COMPONENT,
+        )
+    }
+    pub fn error_02(msg: impl Into<String> + Display) -> ApiException {
+        ApiException::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Error save: {msg}") ,
             COMPONENT,
         )
     }

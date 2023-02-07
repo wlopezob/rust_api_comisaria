@@ -1,0 +1,1 @@
+pub mod ubigeo_repository;

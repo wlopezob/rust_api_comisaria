@@ -3,7 +3,9 @@ use axum::{
     Router,
 };
 
-pub fn comisaria_controller() -> Router {
+use crate::routes::init::AppState;
+
+pub fn comisaria_controller() -> Router<AppState> {
     Router::new().route("/getall", get(get_all))
 }
 

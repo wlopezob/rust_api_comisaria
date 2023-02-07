@@ -1,10 +1,12 @@
+use std::sync::Arc;
+
 use mongodb::{Client, options::ClientOptions, Database};
 
 use crate::Result;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct MongoDb {
-    db: Database
+    db: Arc<Database>
 }
 
 impl MongoDb {
@@ -13,7 +15,11 @@ impl MongoDb {
         client_options.app_name = Some("api_comisaria".to_owned());
         let client = Client::with_options(client_options)?;
         Ok(MongoDb{
-            db: client.database(&name_database.into())
+            db: Arc::new(client.database(&name_database.into()))
         })
     }
+    pub fn get_database(&self) -> Arc<Database>{
+        self.db.clone()
+    }
+
 }

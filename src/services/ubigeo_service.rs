@@ -1,15 +1,15 @@
 use crate::api_caller::ubigeo_api_caller::ApiCaller;
-use crate::db::mongo_db::MongoDb;
 use crate::models::api_exception::ApiException;
 use crate::models::departamento_response::DepartamentoResponse;
-
+use crate::routes::init::UbigeoRepositoryState;
+use crate::utils::api_exception_enum::ApiExceptionEnum;
 pub struct UbigeoService {
-    db: MongoDb
+    pub ubigeo_repository: UbigeoRepositoryState,
 }
 
 impl UbigeoService {
-    pub fn new(db: MongoDb) -> Self {
-        UbigeoService {db}
+    pub fn new(ubigeo_repository: UbigeoRepositoryState) -> Self {
+        UbigeoService { ubigeo_repository }
     }
     pub async fn get_all_dpto(
         &self,
@@ -30,6 +30,13 @@ impl UbigeoService {
                 .unwrap();
             departamentos.push(departamento);
         }
+        //save in db all dpto
+        let h = self.ubigeo_repository.hola();
+        dbg!(h);
+        self.ubigeo_repository
+            .insert_departamento(departamentos.clone())
+            .await
+            .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
         Ok(departamentos)
     }
 }
