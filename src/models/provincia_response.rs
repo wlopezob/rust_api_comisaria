@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize};
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProvinciaResponse {
-    pub features: Vec<Feature>,
+    pub features: Option<Vec<Feature>>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::api_caller::ubigeo_api_caller::ApiCaller;
 use crate::models::api_exception::ApiException;
 use crate::models::departamento_response::DepartamentoResponse;
@@ -63,20 +65,28 @@ impl UbigeoService {
         for departamento in departamentos {
             let new_url_prov = (url_prov.clone().into() as String)
                 .replace("{id_dpto}", departamento.get_id_dpto().as_str());
+            dbg!(&new_url_prov);
+            //sleep 2s
+            tokio::time::sleep(Duration::from_secs(2)).await;
             let rs = ApiCaller::new(new_url_prov)
                 .api_get_all_pro(host, origin)
                 .await?;
-
-            for item in rs.features.into_iter() {
-                let provincia = ProvinciaDocument::new(
-                    item.attributes.id_dpto,
-                    item.attributes.id_prov,
-                    item.attributes.provincia,
-                    item.attributes.capital,
-                );
-                provincias.push(provincia);
+            if let Some(features) = rs.features {
+                for item in features.into_iter() {
+                    let provincia = ProvinciaDocument::new(
+                        item.attributes.id_dpto,
+                        item.attributes.id_prov,
+                        item.attributes.provincia,
+                        item.attributes.capital,
+                    );
+                    provincias.push(provincia);
+                }
             }
         }
+        let provincias = self.ubigeo_repository
+            .insert_provincia(provincias)
+            .await
+            .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
         Ok(provincias)
     }
 }
