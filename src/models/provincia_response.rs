@@ -20,9 +20,12 @@ pub struct Attributes {
     pub objectid: i64,
     #[serde(rename = "id_dpto")]
     pub id_dpto: String,
+    #[serde(rename = "id_prov")]
+    pub id_prov: String,
     pub departamento: String,
     pub capital: String,
     pub fuente: String,
+    pub provincia: String,
     #[serde(rename = "st_area(shape)")]
     pub st_area_shape: f64,
     #[serde(rename = "st_length(shape)")]

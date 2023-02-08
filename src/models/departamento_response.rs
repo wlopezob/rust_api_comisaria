@@ -13,6 +13,9 @@ impl DepartamentoResponse {
     pub fn new() -> Self {
         DepartamentoResponse::default()
     }
+    pub fn get_id_dpto(mut self)-> String {
+        self.id_dpto
+    }
     pub fn id_dpto(mut self, id_dpto: impl Into<String>) -> Self {
         self.id_dpto = id_dpto.into();
         self

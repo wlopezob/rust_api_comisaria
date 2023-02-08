@@ -16,8 +16,5 @@
           "files.autoSave": "off"
       },
       "forwardPorts": [3000, 8500],
-      "postCreateCommand":[
-        "cargo install cargo-watch",
-        "cargo doc"
-      ]
+      "postCreateCommand":"cargo install cargo-watch && cargo doc"
   }
