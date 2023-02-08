@@ -15,5 +15,9 @@
           "workbench.iconTheme": "material-icon-theme",
           "files.autoSave": "off"
       },
-      "forwardPorts": [3000, 8500]
+      "forwardPorts": [3000, 8500],
+      "postCreateCommand":[
+        "cargo install cargo-watch",
+        "cargo doc"
+      ]
   }
