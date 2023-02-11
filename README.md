@@ -1,5 +1,7 @@
 # API COMISARIA
 
+![RUST](https://raw.githubusercontent.com/wlopezob/rust_api_comisaria/main/api.png "RUST")
+
 ## Crates:
 - tokio
 - axum
