@@ -21,7 +21,7 @@ impl ComisariaService {
         url_comisaria: impl Into<String> + Clone,
         host: &'static str,
         origin: &'static str,
-    ) -> Result<bool, ApiException> {
+    ) -> Result<Vec<ComisariaDocument>, ApiException> {
         //get total count comisaria
         let count_comisaria = ComisariaApiCaller::new(url_count)
             .get_total_comisaria(host, origin)
@@ -60,9 +60,9 @@ impl ComisariaService {
         }
         //save all comisaria
         self.comisaria_repository
-            .insert_comisaria(comisarias)
+            .insert_comisaria(comisarias.clone())
             .await
             .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
-        Ok(true)
+        Ok(comisarias)
     }
 }
