@@ -17,4 +17,7 @@ impl ProvinciaDocument {
             capital,
         }
     }
+    pub fn get_id_prov(&self) -> &str{
+        &self.id_prov
+    }
 }

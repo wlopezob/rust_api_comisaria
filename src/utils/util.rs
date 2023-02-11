@@ -1,7 +1,15 @@
 use std::{collections::HashSet, hash::{Hash, Hasher}};
 
+use serde::de::DeserializeOwned;
 use serde_json::Value;
 
+pub fn get_value_response<T: DeserializeOwned>(
+    response_text: impl Into<String> + Clone,
+) -> T {
+    let value_json: Value = serde_json::from_str(&response_text.into()).unwrap();
+    let value_json = remove_duplicates(&value_json);
+    serde_json::from_value::<T>(value_json).unwrap()
+}
 
 struct HashableValue<'a>(&'a Value);
 

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{Router};
+use axum::Router;
 use dotenvy_macro::dotenv;
 
 use crate::{
@@ -9,21 +9,29 @@ use crate::{
         ubigeo_controller::ubigeo_controller,
     },
     db::mongo_db::{self},
-    repository::ubigeo_repository::UbigeoRepository,
+    repository::{comisaria_repository::ComisariaRepository, ubigeo_repository::UbigeoRepository},
 };
 
 #[derive(Clone)]
 pub struct AppState {
     pub ubigeo_repository: UbigeoRepositoryState,
+    pub comisaria_repository: ComisariaRepositoryState,
 }
 
 impl AppState {
-    pub fn new(ubigeo_repository: UbigeoRepositoryState) -> Self {
-        AppState { ubigeo_repository }
+    pub fn new(
+        ubigeo_repository: UbigeoRepositoryState,
+        comisaria_repository: ComisariaRepositoryState,
+    ) -> Self {
+        AppState {
+            ubigeo_repository,
+            comisaria_repository,
+        }
     }
 }
 
 pub type UbigeoRepositoryState = Arc<UbigeoRepository>;
+pub type ComisariaRepositoryState = Arc<ComisariaRepository>;
 
 pub async fn run() {
     let port = dotenv!("SERVER_PORT");
@@ -35,7 +43,10 @@ pub async fn run() {
         .expect("Error load database");
     let ubigeo_repository: UbigeoRepositoryState =
         Arc::new(UbigeoRepository::new(db.get_database()));
-    let app_state = AppState::new(ubigeo_repository);
+    let comisaria_repository: ComisariaRepositoryState =
+        Arc::new(ComisariaRepository::new(db.get_database()));
+
+    let app_state = AppState::new(ubigeo_repository, comisaria_repository);
     let app = init_router(app_state);
 
     axum::Server::bind(&format!("0.0.0.0:{port}").parse().unwrap())

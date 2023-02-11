@@ -3,3 +3,7 @@ pub mod api_exception;
 pub mod departamento_response;
 pub mod provincia_response;
 pub mod provincia_document;
+pub mod distrito_document;
+pub mod distrito_response;
+pub mod comisaria_response;
+pub mod comisaria_document;
