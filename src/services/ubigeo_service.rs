@@ -10,10 +10,48 @@ pub struct UbigeoService {
 }
 
 impl UbigeoService {
-    pub fn new(ubigeo_repository: UbigeoRepositoryState) -> Self {
-        UbigeoService { ubigeo_repository }
+    pub fn new(ubigeo_repository: UbigeoRepositoryState) -> Box<dyn UbigeoServiceInterface + Send + Sync>  {
+        Box::new(UbigeoService { ubigeo_repository })
     }
-    pub async fn get_all_dpto_bd(&self) -> Result<Vec<DepartamentoResponse>, ApiException> {
+    
+}
+
+#[async_trait::async_trait]
+pub trait UbigeoServiceInterface {
+    async fn my_async_function(&self) -> u32;
+    async fn get_all_dpto_bd(&self) -> Result<Vec<DepartamentoResponse>, ApiException>;
+
+    async fn get_all_dpto(
+        &self,
+        url_dpto: String,
+        host: &'static str,
+        origin: &'static str,
+    ) -> Result<Vec<DepartamentoResponse>, ApiException>;
+
+    async fn get_add_dist(
+        &self,
+        url_dist: String,
+        host: &'static str,
+        origin: &'static str,
+    ) -> Result<Vec<DistritoDocument>, ApiException> ;
+
+    async fn get_add_prov(
+        &self,
+        url_prov: String,
+        host: &'static str,
+        origin: &'static str,
+    ) -> Result<Vec<ProvinciaDocument>, ApiException> ;
+}
+
+
+
+
+#[async_trait::async_trait]
+impl UbigeoServiceInterface for  UbigeoService{
+    async fn my_async_function(&self) -> u32 {
+        42
+    }
+    async fn get_all_dpto_bd(&self) -> Result<Vec<DepartamentoResponse>, ApiException> {
         let departamentos = self
             .ubigeo_repository
             .get_all_dpto()
@@ -21,9 +59,10 @@ impl UbigeoService {
             .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
         Ok(departamentos)
     }
-    pub async fn get_all_dpto(
+
+    async fn get_all_dpto(
         &self,
-        url_dpto: impl Into<String>,
+        url_dpto: String,
         host: &'static str,
         origin: &'static str,
     ) -> Result<Vec<DepartamentoResponse>, ApiException> {
@@ -47,9 +86,10 @@ impl UbigeoService {
             .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
         Ok(departamentos)
     }
-    pub async fn get_add_dist(
+
+    async fn get_add_dist(
         &self,
-        url_dist: impl Into<String> + Clone,
+        url_dist: String,
         host: &'static str,
         origin: &'static str,
     ) -> Result<Vec<DistritoDocument>, ApiException> {
@@ -68,7 +108,7 @@ impl UbigeoService {
         for provincia in provincias {
             let mut items_save = Vec::new();
             let new_url_prov =
-                (url_dist.clone().into() as String).replace("{id_prov}", provincia.get_id_prov());
+                url_dist.clone().replace("{id_prov}", provincia.get_id_prov());
             dbg!(&new_url_prov);
             let rs = ApiCaller::new(new_url_prov)
                 .api_get_all_dist(host, origin)
@@ -96,9 +136,9 @@ impl UbigeoService {
         Ok(distritos)
     }
 
-    pub async fn get_add_prov(
+    async fn get_add_prov(
         &self,
-        url_prov: impl Into<String> + Clone,
+        url_prov: String,
         host: &'static str,
         origin: &'static str,
     ) -> Result<Vec<ProvinciaDocument>, ApiException> {
@@ -110,7 +150,7 @@ impl UbigeoService {
             .await
             .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
         for departamento in departamentos {
-            let new_url_prov = (url_prov.clone().into() as String)
+            let new_url_prov = url_prov.clone()
                 .replace("{id_dpto}", departamento.get_id_dpto().as_str());
             dbg!(&new_url_prov);
             //sleep 2s
@@ -138,3 +178,4 @@ impl UbigeoService {
         Ok(provincias)
     }
 }
+

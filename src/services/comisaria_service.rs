@@ -4,6 +4,7 @@ use crate::{
     routes::init::{ComisariaRepositoryState}, utils::api_exception_enum::ApiExceptionEnum,
 };
 
+
 pub struct ComisariaService {
     pub comisaria_repository: ComisariaRepositoryState,
 }

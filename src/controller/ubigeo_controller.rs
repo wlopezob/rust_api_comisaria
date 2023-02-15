@@ -31,7 +31,7 @@ async fn get_all_dpto(
     let host = dotenv!("HOST");
     let origin = dotenv!("ORIGIN");
     let departamentos = ubigeo_service::UbigeoService::new(app_state.ubigeo_repository.clone())
-        .get_all_dpto(url_dpto, host, origin)
+        .get_all_dpto(url_dpto.to_owned(), host, origin)
         .await?;
     Ok(Json(departamentos))
 }
@@ -42,7 +42,7 @@ async fn get_all_prov(
     let host = dotenv!("HOST");
     let origin = dotenv!("ORIGIN");
     let provincias = ubigeo_service::UbigeoService::new(app_state.ubigeo_repository.clone())
-        .get_add_prov(url_prov, host, origin)
+        .get_add_prov(url_prov.to_owned(), host, origin)
         .await?;
     Ok(Json(provincias))
 }
@@ -54,7 +54,7 @@ async fn get_all_dist(
     let host = dotenv!("HOST");
     let origin = dotenv!("ORIGIN");
     let distritos = ubigeo_service::UbigeoService::new(app_state.ubigeo_repository.clone())
-        .get_add_dist(url_dist, host, origin)
+        .get_add_dist(url_dist.to_owned(), host, origin)
         .await?;
     Ok(Json(distritos))
 }
