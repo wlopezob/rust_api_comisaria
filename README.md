@@ -9,6 +9,17 @@
 - reqwest
 - mongodb
 - dotenvy
+- async-trait
+
+## Folders:
+- utils: Metodos utilitarios
+- services: Solicita los datos del repository o api_caller
+- routes: Creacion del router http
+- repository: Capa de acceso a base de datos
+- models: Capa de entidades y DTO
+- db: Capa de conexion a Mongo db
+- controller: Recibe las órdenes del router y se encarga de solicitar los datos al service
+- api_caller: Capa que consume las Apis Externas
 
 Obtenemos los siguientes datos de la pagina: https://www.mininter.gob.pe/ubica-tu-comisaria
 
