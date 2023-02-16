@@ -1,14 +1,25 @@
+use crate::{
+    db::mongo_db::MongoDbConnectionManager,
+    models::comisaria_document::ComisariaDocument,
+    utils::{constants::NAME_DB_COMISARIA, error::Error},
+};
+use mongodb::{bson::doc};
 use std::sync::Arc;
-use crate::{models::comisaria_document::ComisariaDocument, utils::{constants::NAME_DB_COMISARIA, error::Error}};
-use mongodb::{bson::doc, Database};
 
 pub struct ComisariaRepository {
-    db: Arc<Database>,
+    //db: Arc<Database>,
+    conection_manager: Arc<MongoDbConnectionManager>,
 }
 
 impl ComisariaRepository {
-    pub fn new(db: Arc<Database>) -> Self {
-        Self { db }
+    // pub fn new(db: Arc<Database>) -> Self {
+    //     Self { db }
+    // }
+
+    pub fn new(db: Arc<MongoDbConnectionManager>) -> Self {
+        Self {
+            conection_manager: db,
+        }
     }
 
     pub async fn insert_comisaria(
@@ -16,7 +27,10 @@ impl ComisariaRepository {
         comisarias: Vec<ComisariaDocument>,
     ) -> Result<Vec<ComisariaDocument>, Error> {
         let collection = self
-            .db
+            .conection_manager
+            .get_connection()
+            .await
+            .get_database()
             .collection::<ComisariaDocument>(NAME_DB_COMISARIA);
 
         //delete all departamentos

@@ -8,7 +8,7 @@ use crate::{
         comisaria_controller::comisaria_controller, home_controller::home_controller,
         ubigeo_controller::ubigeo_controller,
     },
-    db::mongo_db::{self},
+    db::mongo_db::{MongoDbConnectionManager},
     repository::{comisaria_repository::ComisariaRepository, ubigeo_repository::UbigeoRepository},
 };
 
@@ -38,13 +38,20 @@ pub async fn run() {
     let database_connection = dotenv!("DATABASE_CONNECTION");
     let name_database = dotenv!("NAME_DATABASE");
     dbg!(&database_connection);
-    let db = mongo_db::MongoDb::init(database_connection, name_database)
-        .await
-        .expect("Error load database");
+
+    let connection_manager = Arc::new(
+        MongoDbConnectionManager::new(database_connection, name_database)
+            .await
+            .expect("Error load database"),
+    );
+
+    // let db = mongo_db::MongoDb::init(database_connection, name_database)
+    //     .await
+    //     .expect("Error load database");
     let ubigeo_repository: UbigeoRepositoryState =
-        Arc::new(UbigeoRepository::new(db.get_database()));
+        Arc::new(UbigeoRepository::new(connection_manager.clone()));
     let comisaria_repository: ComisariaRepositoryState =
-        Arc::new(ComisariaRepository::new(db.get_database()));
+        Arc::new(ComisariaRepository::new(connection_manager.clone()));
 
     let app_state = AppState::new(ubigeo_repository, comisaria_repository);
     let app = init_router(app_state);

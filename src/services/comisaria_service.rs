@@ -9,17 +9,24 @@ pub struct ComisariaService {
     pub comisaria_repository: ComisariaRepositoryState,
 }
 
-impl ComisariaService {
-    pub fn new(comisaria_repository: ComisariaRepositoryState) -> Self {
-        Self {
-            comisaria_repository,
-        }
-    }
-
-    pub async fn get_all_comisaria(
+#[async_trait::async_trait]
+pub trait ComisariaInterface {
+    async fn get_all_comisaria(
         &self,
-        url_count: impl Into<String>,
-        url_comisaria: impl Into<String> + Clone,
+        url_count: String,
+        url_comisaria: String,
+        host: &'static str,
+        origin: &'static str,
+    ) -> Result<Vec<ComisariaDocument>, ApiException>;
+
+}
+
+#[async_trait::async_trait]
+impl ComisariaInterface for ComisariaService {
+    async fn get_all_comisaria(
+        &self,
+        url_count: String,
+        url_comisaria: String,
         host: &'static str,
         origin: &'static str,
     ) -> Result<Vec<ComisariaDocument>, ApiException> {
@@ -29,7 +36,7 @@ impl ComisariaService {
             .await?;
         dbg!(count_comisaria);
 
-        let new_url_comisaria = (url_comisaria.clone().into() as String)
+        let new_url_comisaria = url_comisaria.clone()
             .replace("{total}", count_comisaria.to_string().as_str());
 
         dbg!(&new_url_comisaria);
@@ -65,5 +72,13 @@ impl ComisariaService {
             .await
             .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
         Ok(comisarias)
+    }
+}
+
+impl ComisariaService {
+    pub fn new(comisaria_repository: ComisariaRepositoryState) -> Box<dyn ComisariaInterface  + Send + Sync> {
+        Box::new(ComisariaService {
+            comisaria_repository,
+        })
     }
 }

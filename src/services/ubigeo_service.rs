@@ -18,7 +18,6 @@ impl UbigeoService {
 
 #[async_trait::async_trait]
 pub trait UbigeoServiceInterface {
-    async fn my_async_function(&self) -> u32;
     async fn get_all_dpto_bd(&self) -> Result<Vec<DepartamentoResponse>, ApiException>;
 
     async fn get_all_dpto(
@@ -48,9 +47,6 @@ pub trait UbigeoServiceInterface {
 
 #[async_trait::async_trait]
 impl UbigeoServiceInterface for  UbigeoService{
-    async fn my_async_function(&self) -> u32 {
-        42
-    }
     async fn get_all_dpto_bd(&self) -> Result<Vec<DepartamentoResponse>, ApiException> {
         let departamentos = self
             .ubigeo_repository
