@@ -19,7 +19,8 @@ pub fn ubigeo_controller() -> Router<AppState> {
 async fn get_all_dpto_bd(
     State(app_state): State<AppState>,
 ) -> Result<Json<Vec<DepartamentoResponse>>, ApiException> {
-    let departamentos = UbigeoService::new(app_state.ubigeo_repository.clone())
+    let departamentos = UbigeoService::new(app_state.ubigeo_repository.clone(),
+    app_state.producer_kafka.clone())
         .get_all_dpto_bd()
         .await?;
     Ok(Json(departamentos))
@@ -30,7 +31,8 @@ async fn get_all_dpto(
     let url_dpto = dotenv!("URL_DPTO");
     let host = dotenv!("HOST");
     let origin = dotenv!("ORIGIN");
-    let departamentos = ubigeo_service::UbigeoService::new(app_state.ubigeo_repository.clone())
+    let departamentos = ubigeo_service::UbigeoService::new(app_state.ubigeo_repository.clone(),
+    app_state.producer_kafka.clone())
         .get_all_dpto(url_dpto.to_owned(), host, origin)
         .await?;
     Ok(Json(departamentos))
@@ -41,7 +43,8 @@ async fn get_all_prov(
     let url_prov = dotenv!("URL_PRO");
     let host = dotenv!("HOST");
     let origin = dotenv!("ORIGIN");
-    let provincias = ubigeo_service::UbigeoService::new(app_state.ubigeo_repository.clone())
+    let provincias = ubigeo_service::UbigeoService::new(app_state.ubigeo_repository.clone(),
+    app_state.producer_kafka.clone())
         .get_add_prov(url_prov.to_owned(), host, origin)
         .await?;
     Ok(Json(provincias))
@@ -53,7 +56,8 @@ async fn get_all_dist(
     let url_dist = dotenv!("URL_DIST");
     let host = dotenv!("HOST");
     let origin = dotenv!("ORIGIN");
-    let distritos = ubigeo_service::UbigeoService::new(app_state.ubigeo_repository.clone())
+    let distritos = ubigeo_service::UbigeoService::new(app_state.ubigeo_repository.clone(),
+    app_state.producer_kafka.clone())
         .get_add_dist(url_dist.to_owned(), host, origin)
         .await?;
     Ok(Json(distritos))

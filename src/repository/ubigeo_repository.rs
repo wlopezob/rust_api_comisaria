@@ -16,14 +16,11 @@ use crate::{
 };
 
 pub struct UbigeoRepository {
-    //db: Arc<Database>,
     conection_manager: Arc<MongoDbConnectionManager>,
 }
 
 impl UbigeoRepository {
-    // pub fn new(db: Arc<Database>) -> Self {
-    //     UbigeoRepository { db }
-    // }
+
     pub fn new(db: Arc<MongoDbConnectionManager>) -> Self {
         UbigeoRepository {
             conection_manager: db,

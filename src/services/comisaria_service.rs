@@ -1,12 +1,13 @@
 use crate::{
     api_caller::comisaria_api_caller::ComisariaApiCaller,
     models::{api_exception::ApiException, comisaria_document::ComisariaDocument},
-    routes::init::{ComisariaRepositoryState}, utils::api_exception_enum::ApiExceptionEnum,
+    routes::init::{ComisariaRepositoryState, ProducerKafkaState}, utils::api_exception_enum::ApiExceptionEnum,
 };
 
 
 pub struct ComisariaService {
     pub comisaria_repository: ComisariaRepositoryState,
+    pub producer_kafka: ProducerKafkaState
 }
 
 #[async_trait::async_trait]
@@ -76,9 +77,10 @@ impl ComisariaInterface for ComisariaService {
 }
 
 impl ComisariaService {
-    pub fn new(comisaria_repository: ComisariaRepositoryState) -> Box<dyn ComisariaInterface  + Send + Sync> {
+    pub fn new(comisaria_repository: ComisariaRepositoryState, producer_kafka: ProducerKafkaState) -> Box<dyn ComisariaInterface  + Send + Sync> {
         Box::new(ComisariaService {
             comisaria_repository,
+            producer_kafka
         })
     }
 }

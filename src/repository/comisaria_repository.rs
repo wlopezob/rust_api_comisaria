@@ -12,10 +12,6 @@ pub struct ComisariaRepository {
 }
 
 impl ComisariaRepository {
-    // pub fn new(db: Arc<Database>) -> Self {
-    //     Self { db }
-    // }
-
     pub fn new(db: Arc<MongoDbConnectionManager>) -> Self {
         Self {
             conection_manager: db,

@@ -1,19 +1,25 @@
 use crate::api_caller::ubigeo_api_caller::ApiCaller;
 use crate::models::api_exception::ApiException;
 use crate::models::departamento_response::DepartamentoResponse;
-use crate::models::distrito_document::{DistritoDocument};
+use crate::models::distrito_document::DistritoDocument;
 use crate::models::provincia_document::ProvinciaDocument;
-use crate::routes::init::UbigeoRepositoryState;
+use crate::routes::init::{ProducerKafkaState, UbigeoRepositoryState};
 use crate::utils::api_exception_enum::ApiExceptionEnum;
 pub struct UbigeoService {
     pub ubigeo_repository: UbigeoRepositoryState,
+    pub producer_kafka: ProducerKafkaState,
 }
 
 impl UbigeoService {
-    pub fn new(ubigeo_repository: UbigeoRepositoryState) -> Box<dyn UbigeoServiceInterface + Send + Sync>  {
-        Box::new(UbigeoService { ubigeo_repository })
+    pub fn new(
+        ubigeo_repository: UbigeoRepositoryState,
+        producer_kafka: ProducerKafkaState,
+    ) -> Box<dyn UbigeoServiceInterface + Send + Sync> {
+        Box::new(UbigeoService {
+            ubigeo_repository,
+            producer_kafka,
+        })
     }
-    
 }
 
 #[async_trait::async_trait]
@@ -32,21 +38,18 @@ pub trait UbigeoServiceInterface {
         url_dist: String,
         host: &'static str,
         origin: &'static str,
-    ) -> Result<Vec<DistritoDocument>, ApiException> ;
+    ) -> Result<Vec<DistritoDocument>, ApiException>;
 
     async fn get_add_prov(
         &self,
         url_prov: String,
         host: &'static str,
         origin: &'static str,
-    ) -> Result<Vec<ProvinciaDocument>, ApiException> ;
+    ) -> Result<Vec<ProvinciaDocument>, ApiException>;
 }
 
-
-
-
 #[async_trait::async_trait]
-impl UbigeoServiceInterface for  UbigeoService{
+impl UbigeoServiceInterface for UbigeoService {
     async fn get_all_dpto_bd(&self) -> Result<Vec<DepartamentoResponse>, ApiException> {
         let departamentos = self
             .ubigeo_repository
@@ -80,6 +83,13 @@ impl UbigeoServiceInterface for  UbigeoService{
             .insert_departamento(departamentos.clone())
             .await
             .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
+        //convert obj to string with format json
+        let txt_departamentos = serde_json::to_string(&departamentos)
+            .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
+        //send data to kafka
+        self.producer_kafka.send("get_all_dpto", txt_departamentos.clone()).await
+            .map_err(|error| ApiExceptionEnum::error_02(error.0.to_string()))?;
+
         Ok(departamentos)
     }
 
@@ -91,9 +101,11 @@ impl UbigeoServiceInterface for  UbigeoService{
     ) -> Result<Vec<DistritoDocument>, ApiException> {
         let mut distritos = Vec::new();
         //delete all distritos
-        self.ubigeo_repository.delete_all_distrito().await
-        .map_err(|error| ApiExceptionEnum::error_04(error.to_string()))?;
-        
+        self.ubigeo_repository
+            .delete_all_distrito()
+            .await
+            .map_err(|error| ApiExceptionEnum::error_04(error.to_string()))?;
+
         //get all provincia
         let provincias = self
             .ubigeo_repository
@@ -103,8 +115,9 @@ impl UbigeoServiceInterface for  UbigeoService{
 
         for provincia in provincias {
             let mut items_save = Vec::new();
-            let new_url_prov =
-                url_dist.clone().replace("{id_prov}", provincia.get_id_prov());
+            let new_url_prov = url_dist
+                .clone()
+                .replace("{id_prov}", provincia.get_id_prov());
             dbg!(&new_url_prov);
             let rs = ApiCaller::new(new_url_prov)
                 .api_get_all_dist(host, origin)
@@ -125,8 +138,10 @@ impl UbigeoServiceInterface for  UbigeoService{
                 }
             }
             if !items_save.is_empty() {
-                self.ubigeo_repository.insert_distrito(items_save)
-                .await.map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
+                self.ubigeo_repository
+                    .insert_distrito(items_save)
+                    .await
+                    .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
             }
         }
         Ok(distritos)
@@ -146,7 +161,8 @@ impl UbigeoServiceInterface for  UbigeoService{
             .await
             .map_err(|error| ApiExceptionEnum::error_02(error.to_string()))?;
         for departamento in departamentos {
-            let new_url_prov = url_prov.clone()
+            let new_url_prov = url_prov
+                .clone()
                 .replace("{id_dpto}", departamento.get_id_dpto().as_str());
             dbg!(&new_url_prov);
             //sleep 2s
@@ -174,4 +190,3 @@ impl UbigeoServiceInterface for  UbigeoService{
         Ok(provincias)
     }
 }
-

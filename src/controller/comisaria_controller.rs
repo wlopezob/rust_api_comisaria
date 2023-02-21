@@ -19,7 +19,8 @@ async fn get_all(
     let host = dotenv!("HOST");
     let origin = dotenv!("ORIGIN");
 
-    let comisarias = ComisariaService::new(app_state.comisaria_repository.clone())
+    let comisarias = ComisariaService::new(app_state.comisaria_repository.clone(),
+    app_state.producer_kafka.clone())
         .get_all_comisaria(
             url_comisaria_count.to_owned(),
             url_comisaria.to_owned(),
